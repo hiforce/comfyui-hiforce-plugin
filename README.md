@@ -1,4 +1,4 @@
-# comfyui-hiforce-plugin
+# Comfyui HiFORCE Plugin
 
 
 Custom nodes pack provided by [HiFORCE](https://www.hiforce.net) for ComfyUI. This custom node helps to conveniently enhance images through Sampler, Upscaler, Mask, and more.
@@ -17,3 +17,10 @@ Custom nodes pack provided by [HiFORCE](https://www.hiforce.net) for ComfyUI. Th
 * **Some Swith Input for Sampler Node**
 
 Sampler Introduction (Chinese Version): [https://hiforce.yuque.com/org-wiki-hiforce-kbgemz/fpx22q/gtf57av9gkvgek5p](https://hiforce.yuque.com/org-wiki-hiforce-kbgemz/fpx22q/gtf57av9gkvgek5p)
+
+
+## Installation
+
+1. `cd custom_nodes`
+2. `git clone https://github.com/hiforce/comfyui-hiforce-plugin.git`
+3. `cd comfyui-hiforce-plugin` and run `pip install -r requirements.txt`
