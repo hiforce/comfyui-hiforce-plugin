@@ -1,4 +1,9 @@
+import os
+import random
+
+import folder_paths
 import numpy as np
+import requests
 import torch
 from PIL import Image
 from torch import Tensor
@@ -78,6 +83,7 @@ def tensor2rgba(t: torch.Tensor) -> torch.Tensor:
     else:
         return t
 
+
 def adjust_image_with_max_size(image: Tensor, max_size: int):
     image_size = image.size()
     image_width = int(image_size[2])
@@ -101,3 +107,30 @@ def adjust_image_with_max_size(image: Tensor, max_size: int):
     if image_width > max_size:
         return process_resize_image(image, max_size, max_size)
     return process_resize_image(image, image_width, image_height)
+
+
+def get_image_from_url(url: str) -> Image:
+    temp_path = folder_paths.get_temp_directory()
+    os.makedirs(temp_path, exist_ok=True)
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        temp_str = ''.join(random.choice("abcdefghijklmnopqrstupvxyz") for x in range(5))
+        temp_file = f"hf_temp_{temp_str}.png"
+        local_file = f"{temp_path}/{temp_file}"
+        open(local_file, "wb").write(r.content)
+        i = Image.open(local_file)
+        del r
+        return i
+    del r
+    return None
+
+
+def convert_ptl_image_array_to_np_array(images):
+    torch_images = None
+    for image in images:
+        if torch_images is None:
+            torch_images = convert_image_to_tensor_array(image)
+        else:
+            the_images = convert_image_to_tensor_array(image)
+            torch_images = torch.cat((torch_images, the_images), dim=0)
+    return torch_images

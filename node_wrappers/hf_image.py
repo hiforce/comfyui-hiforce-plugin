@@ -6,7 +6,8 @@ import folder_paths
 import numpy as np
 from PIL import Image
 
-from hiforce.image import tensor2rgba, tensor2rgb, process_resize_image, adjust_image_with_max_size
+from hiforce.image import tensor2rgba, tensor2rgb, process_resize_image, adjust_image_with_max_size, get_image_from_url, \
+    convert_ptl_image_array_to_np_array
 from hiforce.notify import ImageSaveNotify
 
 
@@ -148,12 +149,42 @@ class HfSaveImage:
         return {"ui": {"images": results}}
 
 
+class LoadImageFromURL:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "url": ("STRING", {"multiline": False}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING")
+    RETURN_NAMES = ("images", "url")
+    FUNCTION = "process"
+
+    CATEGORY = "HiFORCE/Image/Save"
+
+    def process(self, url):
+        spec_url_list = url.split(",")
+        temp_path = folder_paths.get_temp_directory()
+        os.makedirs(temp_path, exist_ok=True)
+
+        image_list = []
+        for url in spec_url_list:
+            i = get_image_from_url(url)
+            if i is not None:
+                image_list.append(i)
+        out = convert_ptl_image_array_to_np_array(image_list)
+        return out, url
+
+
 NODE_CLASS_MAPPINGS = {
     "HfResizeImage": HfResizeImage,
     "HfInitImageWithMaxSize": HfInitImageWithMaxSize,
     "HfSaveImage": HfSaveImage,
     "HfImageToRGB": HfImageToRGB,
     "HfImageToRGBA": HfImageToRGBA,
+    "LoadImageFromURL": LoadImageFromURL,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -161,5 +192,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "HfInitImageWithMaxSize": "Init Image to limited Size",
     "HfSaveImage": "Save Image",
     "HfImageToRGB": "Convert Image to RGB",
-    "HfImageToRGBA": "Convert Image to RGBA"
+    "HfImageToRGBA": "Convert Image to RGBA",
+    "LoadImageFromURL": "Load Images from URL",
 }
