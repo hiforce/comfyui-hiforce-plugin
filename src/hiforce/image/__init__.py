@@ -77,3 +77,27 @@ def tensor2rgba(t: torch.Tensor) -> torch.Tensor:
         return torch.cat((t, alpha_tensor), dim=3)
     else:
         return t
+
+def adjust_image_with_max_size(image: Tensor, max_size: int):
+    image_size = image.size()
+    image_width = int(image_size[2])
+    image_height = int(image_size[1])
+
+    if max_size % 8 != 0:
+        max_size = max_size - (max_size % 8)
+
+    if image_width > image_height:
+        if image_width > max_size:
+            width = max_size
+            height = image_height * max_size / image_width
+            return process_resize_image(image, width, height)
+        return image
+    elif image_height > image_width:
+        if image_height > max_size:
+            height = max_size
+            width = image_width * max_size / image_height
+            return process_resize_image(image, width, height)
+        return image
+    if image_width > max_size:
+        return process_resize_image(image, max_size, max_size)
+    return process_resize_image(image, image_width, image_height)
