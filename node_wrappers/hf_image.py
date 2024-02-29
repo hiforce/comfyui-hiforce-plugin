@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 
 from hiforce.image import tensor2rgba, tensor2rgb, process_resize_image, adjust_image_with_max_size, get_image_from_url, \
-    convert_ptl_image_array_to_np_array
+    convert_ptl_image_array_to_np_array, ImageExpansionSquareCopper
 from hiforce.notify import ImageSaveNotify
 
 
@@ -178,6 +178,30 @@ class LoadImageFromURL:
         return out, url
 
 
+class HfImageAutoExpansionSquare:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+                "expansion_multiple": ("FLOAT", {"default": 1.2, "min": 0.01, "max": 100, "step": 0.01}),
+                "size": ("INT", {"default": 1024, "min": 512, "max": 1024}),
+                "align": (["bottom", "center", "top"],)
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("result",)
+    FUNCTION = "process"
+
+    CATEGORY = "HiFORCE/Image/Zoom"
+
+    def process(self, images, expansion_multiple: float, size: int, align="bottom"):
+        copper = ImageExpansionSquareCopper(expansion_multiple, size, align)
+        out = copper.process_tensor_image_array(images)
+        return (out,)
+
+
 NODE_CLASS_MAPPINGS = {
     "HfResizeImage": HfResizeImage,
     "HfInitImageWithMaxSize": HfInitImageWithMaxSize,
@@ -185,6 +209,7 @@ NODE_CLASS_MAPPINGS = {
     "HfImageToRGB": HfImageToRGB,
     "HfImageToRGBA": HfImageToRGBA,
     "LoadImageFromURL": LoadImageFromURL,
+    "HfImageAutoExpansionSquare": HfImageAutoExpansionSquare,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -194,4 +219,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "HfImageToRGB": "Convert Image to RGB",
     "HfImageToRGBA": "Convert Image to RGBA",
     "LoadImageFromURL": "Load Images from URL",
+    "HfImageAutoExpansionSquare": "Image Enlargement - Zoom and Crop into a Square",
 }

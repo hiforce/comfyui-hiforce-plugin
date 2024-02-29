@@ -9,6 +9,78 @@ from PIL import Image
 from torch import Tensor
 
 
+class ImageCopper:
+    def __init__(self):
+        pass
+
+
+class ImageExpansionSquareCopper(ImageCopper):
+    def __init__(self, expansion_multiple=1.5, size=1024, align="bottom"):
+        super().__init__()
+        self.enable = True
+        self.expansion_multiple = expansion_multiple
+        self.size = size
+        self.align = align
+
+    def cop(self, ptl_image) -> Image:
+        if not self.enable:
+            return ptl_image
+
+        width, height = ptl_image.size
+        new_base_image = Image.new(
+            'RGB',
+            size=(int(width * self.expansion_multiple), int(height * self.expansion_multiple)),
+            color=(255, 255, 255))
+
+        ptl_image = ptl_image.convert("RGBA")
+
+        adjust_x = int((new_base_image.width - ptl_image.width) / 2)
+        if self.align == "center":
+            adjust_y = int((new_base_image.height - ptl_image.height) / 2)
+        elif self.align == "bottom":
+            adjust_y = int(new_base_image.height - ptl_image.height)
+        else:
+            adjust_y = 0
+        new_base_image.paste(ptl_image, (adjust_x, adjust_y), mask=ptl_image)
+
+        new_height = self.size
+        new_width = int((new_height / height) * width)
+        new_base_image = new_base_image.resize((new_width, new_height), Image.ANTIALIAS)
+        new_base_image = new_base_image.convert("RGBA")
+
+        adjust_x = int((self.size - new_base_image.width) / 2)
+        img = Image.new('RGB', size=(self.size, self.size), color=(255, 255, 255))
+        img.paste(new_base_image, (adjust_x, 0), mask=new_base_image)
+
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        return img
+
+    def process_ptl_image_list(self, images):
+        out = None
+        for ptl_image in images:
+            img = self.cop(ptl_image)
+            np_image_array = convert_image_to_tensor_array(img)
+            if out is None:
+                out = np_image_array
+            else:
+                out = torch.cat((out, np_image_array), dim=0)
+        return out
+
+    def process_tensor_image_array(self, images):
+        out = None
+        for image in images:
+            ptl_image = tensor_image_to_ptl_image(image)
+            img = self.cop(ptl_image)
+            np_image_array = convert_image_to_tensor_array(img)
+
+            if out is None:
+                out = np_image_array
+            else:
+                out = torch.cat((out, np_image_array), dim=0)
+        return out
+
+
 def tensor_image_to_ptl_image(image: Tensor):
     i = 255. * image.cpu().numpy()
     img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
