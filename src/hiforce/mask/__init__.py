@@ -1,5 +1,6 @@
-import torch
 import comfy
+import torch
+
 
 def composite(destination, source, x, y, mask=None, multiplier=8, resize_source=False):
     if resize_source:
