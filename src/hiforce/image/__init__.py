@@ -1,5 +1,6 @@
 import os
 import random
+from abc import abstractmethod
 
 import folder_paths
 import numpy as np
@@ -9,12 +10,29 @@ from PIL import Image
 from torch import Tensor
 
 
-class ImageCopper:
+class ImageCropper:
     def __init__(self):
         pass
 
+    @abstractmethod
+    def crop(self, image: Image) -> Image:
+        pass
 
-class ImageExpansionSquareCopper(ImageCopper):
+    def crop_tensor_images(self, images):
+        out = None
+        for image in images:
+            ptl_image = tensor_image_to_ptl_image(image)
+            img = self.crop(ptl_image)
+            np_image_array = convert_image_to_tensor_array(img)
+
+            if out is None:
+                out = np_image_array
+            else:
+                out = torch.cat((out, np_image_array), dim=0)
+        return out
+
+
+class ImageExpansionSquareCropper(ImageCropper):
     def __init__(self, expansion_multiple=1.5, size=1024, align="bottom"):
         super().__init__()
         self.enable = True
@@ -22,7 +40,7 @@ class ImageExpansionSquareCopper(ImageCopper):
         self.size = size
         self.align = align
 
-    def cop(self, ptl_image) -> Image:
+    def crop(self, ptl_image) -> Image:
         if not self.enable:
             return ptl_image
 
@@ -55,30 +73,6 @@ class ImageExpansionSquareCopper(ImageCopper):
         if img.mode != 'RGB':
             img = img.convert('RGB')
         return img
-
-    def process_ptl_image_list(self, images):
-        out = None
-        for ptl_image in images:
-            img = self.cop(ptl_image)
-            np_image_array = convert_image_to_tensor_array(img)
-            if out is None:
-                out = np_image_array
-            else:
-                out = torch.cat((out, np_image_array), dim=0)
-        return out
-
-    def process_tensor_image_array(self, images):
-        out = None
-        for image in images:
-            ptl_image = tensor_image_to_ptl_image(image)
-            img = self.cop(ptl_image)
-            np_image_array = convert_image_to_tensor_array(img)
-
-            if out is None:
-                out = np_image_array
-            else:
-                out = torch.cat((out, np_image_array), dim=0)
-        return out
 
 
 def tensor_image_to_ptl_image(image: Tensor):

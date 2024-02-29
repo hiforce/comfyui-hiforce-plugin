@@ -4,10 +4,11 @@ import uuid
 
 import folder_paths
 import numpy as np
-from PIL import Image
+import torch
+from PIL import Image, ImageOps
 
 from hiforce.image import tensor2rgba, tensor2rgb, process_resize_image, adjust_image_with_max_size, get_image_from_url, \
-    convert_ptl_image_array_to_np_array, ImageExpansionSquareCopper
+    convert_ptl_image_array_to_np_array, ImageExpansionSquareCropper, ImageCropper
 from hiforce.notify import ImageSaveNotify
 
 
@@ -197,9 +198,52 @@ class HfImageAutoExpansionSquare:
     CATEGORY = "HiFORCE/Image/Zoom"
 
     def process(self, images, expansion_multiple: float, size: int, align="bottom"):
-        copper = ImageExpansionSquareCopper(expansion_multiple, size, align)
-        out = copper.process_tensor_image_array(images)
+        copper = ImageExpansionSquareCropper(expansion_multiple, size, align)
+        out = copper.crop_tensor_images(images)
         return (out,)
+
+
+class HfLoadImageWithCropper:
+    @classmethod
+    def INPUT_TYPES(s):
+        input_dir = folder_paths.get_input_directory()
+        files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
+        return {
+            "required": {
+                "image": (sorted(files), {"image_upload": True})
+            },
+            "optional": {
+                "image_copper": ("IMAGE_COPPER",)
+            }
+        }
+
+    CATEGORY = "HiFORCE/Image/Create"
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("images",)
+    FUNCTION = "load_image"
+
+    def load_image(self, image, image_copper: ImageCropper = None):
+
+        image_list = []
+
+        image_path = folder_paths.get_annotated_filepath(image)
+        if not os.path.exists(image_path):
+            i = Image.new("RGB", (512, 512))
+        else:
+            i = Image.open(image_path)
+            i = ImageOps.exif_transpose(i)
+
+        image = i.convert("RGB")
+        image_list.append(image)
+
+        image = np.array(image).astype(np.float32) / 255.0
+        image = torch.from_numpy(image)[None,]
+        if image_copper is not None:
+            out = image_copper.crop_tensor_images((image,))
+            return (out,)
+
+        return (image,)
 
 
 NODE_CLASS_MAPPINGS = {
@@ -210,6 +254,7 @@ NODE_CLASS_MAPPINGS = {
     "HfImageToRGBA": HfImageToRGBA,
     "LoadImageFromURL": LoadImageFromURL,
     "HfImageAutoExpansionSquare": HfImageAutoExpansionSquare,
+    "HfLoadImageWithCropper": HfLoadImageWithCropper,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -220,4 +265,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "HfImageToRGBA": "Convert Image to RGBA",
     "LoadImageFromURL": "Load Images from URL",
     "HfImageAutoExpansionSquare": "Image Enlargement - Zoom and Crop into a Square",
+    "HfLoadImageWithCropper": "Load and Crop Image",
 }
