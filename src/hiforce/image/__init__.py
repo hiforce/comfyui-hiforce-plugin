@@ -30,8 +30,6 @@ def process_resize_image(images, width, height):
 
     new_width = int(width - width % 8)
     new_height = int(height - height % 8)
-    print(f"width:{new_width}, height: {new_height}")
-    print(f"width mod:{width % 8}, height: {new_height}")
 
     for image in images:
         origin = tensor_image_to_ptl_image(image)
