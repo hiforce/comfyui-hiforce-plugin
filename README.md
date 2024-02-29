@@ -6,6 +6,12 @@ Custom nodes pack provided by [HiFORCE](https://www.hiforce.net) for ComfyUI. Th
 ## NOTICE 
 * You should install [ComfyUI-Impact-Pack](https://github.com/ltdrdata/ComfyUI-Impact-Pack). Many optimizations are built upon the foundation of ComfyUI-Impact-Pack.
 
+## Installation
+
+1. `cd custom_nodes`
+2. `git clone https://github.com/hiforce/comfyui-hiforce-plugin.git`
+3. `cd comfyui-hiforce-plugin` and run `pip install -r requirements.txt`
+
 
 ## Custom Nodes
 ### Samplers:
@@ -19,10 +25,3 @@ Custom nodes pack provided by [HiFORCE](https://www.hiforce.net) for ComfyUI. Th
 [Read More](https://github.com/hiforce/comfyui-hiforce-plugin/wiki/Sampler-Nodes-Introduction)
 
 [Read More中文版](https://hiforce.yuque.com/org-wiki-hiforce-kbgemz/fpx22q/gtf57av9gkvgek5p)
-
-
-## Installation
-
-1. `cd custom_nodes`
-2. `git clone https://github.com/hiforce/comfyui-hiforce-plugin.git`
-3. `cd comfyui-hiforce-plugin` and run `pip install -r requirements.txt`
