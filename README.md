@@ -8,7 +8,7 @@ Custom nodes pack provided by [HiFORCE](https://www.hiforce.net) for ComfyUI. Th
 
 
 ## Custom Nodes
-### Samplers
+### Samplers: [More](https://github.com/hiforce/comfyui-hiforce-plugin/wiki/Sampler-Nodes-Introduction)
 * **Basic Sampler:** Basic Sampler is very similar to the KSampler provided by ComfyUI, except that it exposes the 'full_drawing' option. This field corresponds to the 'return_with_leftover_noise' option in KSampler (Advanced), but with opposite values. The name 'full_drawing' is more user-friendly for developers familiar with the Stable Diffusion WebUI.
 * **Loopback Sampler：** The Loopback Sampler allows you to generate images progressively using different drawing intensities.
 * **HfTwoSamplersForMask：** Enhance of the TwoSamplersforMask of ComfyUI-Impact-Pack. We add enable option. If the 'enable' option is set to false, then this sampler will not function.
